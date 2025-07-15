@@ -1,0 +1,43 @@
+<div style="padding: 30px; font-family: Arial;">
+  <h2>Contact List</h2>
+
+  <form (submit)="addContact(); $event.preventDefault();" style="margin-bottom: 20px;">
+    <input [(ngModel)]="newContact.name" name="name" placeholder="Name" required />
+    <input [(ngModel)]="newContact.email" name="email" placeholder="Email" />
+    <input [(ngModel)]="newContact.number" name="number" placeholder="Number" />
+    <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; margin-left: 5px;">Add</button>
+  </form>
+
+  <table style="width: 100%; border-collapse: collapse; background-color: #f9f9f9;">
+    <thead>
+      <tr style="background-color: #eaeaea;">
+        <th style="padding: 10px; text-align: left;">Name</th>
+        <th style="padding: 10px; text-align: left;">Email</th>
+        <th style="padding: 10px; text-align: left;">Number</th>
+        <th style="padding: 10px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let contact of contacts" style="border-bottom: 1px solid #ccc;">
+        <ng-container *ngIf="editingContact?.id !== contact.id">
+          <td style="padding: 10px;">{{ contact.name }}</td>
+          <td style="padding: 10px;">{{ contact.email }}</td>
+          <td style="padding: 10px;">{{ contact.number }}</td>
+          <td style="padding: 10px;">
+            <button (click)="editContact(contact)" style="background-color: #ffc107; color: white; border: none; padding: 5px 10px; margin-right: 5px;">Edit</button>
+            <button (click)="deleteContact(contact.id!)" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px;">Delete</button>
+          </td>
+        </ng-container>
+        <ng-container *ngIf="editingContact?.id === contact.id">
+          <td style="padding: 10px;"><input [(ngModel)]="editingContact.name" /></td>
+          <td style="padding: 10px;"><input [(ngModel)]="editingContact.email" /></td>
+          <td style="padding: 10px;"><input [(ngModel)]="editingContact.number" /></td>
+          <td style="padding: 10px;">
+            <button (click)="updateContact()" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; margin-right: 5px;">Save</button>
+            <button (click)="cancelEdit()" style="background-color: #6c757d; color: white; border: none; padding: 5px 10px;">Cancel</button>
+          </td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
+</div>
