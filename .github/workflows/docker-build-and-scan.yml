@@ -1,9 +1,9 @@
-name: CI/CD - Build, Scan, Push Docker Images
+name: Build, Scan, Push Docker Images
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # ✅ Manual trigger support
+  workflow_dispatch:
 
 env:
   DOCKER_REGISTRY: docker.io
@@ -11,10 +11,19 @@ env:
   BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/backend-api
 
 jobs:
-  docker-build-scan-push:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      username: ${{ secrets.DOCKER_USERNAME }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+  build-frontend:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout frontend
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
@@ -26,11 +35,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # --- Frontend Build ---
-      - name: Build frontend image
-        run: docker build -t $FRONTEND_IMAGE:latest ./frontend
+      - name: Build frontend Docker image
+        run: docker build -t ${{ env.FRONTEND_IMAGE }}:latest ./frontend
 
-      - name: Trivy scan frontend image
+      - name: Scan frontend image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.FRONTEND_IMAGE }}:latest
@@ -38,15 +46,32 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+          skip-files: |
+            root/.npm/_cacache/**
 
       - name: Push frontend image
-        run: docker push $FRONTEND_IMAGE:latest
+        run: docker push ${{ env.FRONTEND_IMAGE }}:latest
 
-      # --- Backend Build ---
-      - name: Build backend image
-        run: docker build -t $BACKEND_IMAGE:latest ./backend
+  build-backend:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v3
 
-      - name: Trivy scan backend image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build backend Docker image
+        run: docker build -t ${{ env.BACKEND_IMAGE }}:latest ./backend
+
+      - name: Scan backend image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:latest
@@ -54,6 +79,8 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+          skip-files: |
+            root/.npm/_cacache/**
 
       - name: Push backend image
-        run: docker push $BACKEND_IMAGE:latest
+        run: docker push ${{ env.BACKEND_IMAGE }}:latest
