@@ -93,19 +93,17 @@ jobs:
     needs: build-frontend
     runs-on: ubuntu-latest
     steps:
-      - name: Install Trivy
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y wget
-          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.49.1_Linux-64bit.deb
-          sudo dpkg -i trivy.deb
+      - name: Pull frontend image
+        run: docker pull ${{ env.FRONTEND_IMAGE }}:latest
 
-      - name: Generate SBOM for frontend image (CycloneDX)
-        run: |
-          docker pull ${{ env.FRONTEND_IMAGE }}:latest
-          trivy image --format cyclonedx --output frontend-sbom.xml ${{ env.FRONTEND_IMAGE }}:latest
+      - name: Generate and upload SBOM (CycloneDX) for frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:latest
+          format: cyclonedx
+          output: frontend-sbom.xml
 
-      - name: Upload frontend SBOM
+      - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-sbom
@@ -115,19 +113,17 @@ jobs:
     needs: build-backend
     runs-on: ubuntu-latest
     steps:
-      - name: Install Trivy
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y wget
-          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.49.1_Linux-64bit.deb
-          sudo dpkg -i trivy.deb
+      - name: Pull backend image
+        run: docker pull ${{ env.BACKEND_IMAGE }}:latest
 
-      - name: Generate SBOM for backend image (CycloneDX)
-        run: |
-          docker pull ${{ env.BACKEND_IMAGE }}:latest
-          trivy image --format cyclonedx --output backend-sbom.xml ${{ env.BACKEND_IMAGE }}:latest
+      - name: Generate and upload SBOM (CycloneDX) for backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:latest
+          format: cyclonedx
+          output: backend-sbom.xml
 
-      - name: Upload backend SBOM
+      - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-sbom
