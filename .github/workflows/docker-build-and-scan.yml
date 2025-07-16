@@ -1,4 +1,4 @@
-name: Build, Scan, Push Docker Images
+name: Build, Scan, and Generate SBOMs
 
 on:
   push:
@@ -93,13 +93,20 @@ jobs:
     needs: build-frontend
     runs-on: ubuntu-latest
     steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget
+          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.49.1_Linux-64bit.deb
+          sudo dpkg -i trivy.deb
+
       - name: Generate SBOM for frontend image (CycloneDX)
         run: |
           docker pull ${{ env.FRONTEND_IMAGE }}:latest
           trivy image --format cyclonedx --output frontend-sbom.xml ${{ env.FRONTEND_IMAGE }}:latest
 
       - name: Upload frontend SBOM
-        uses: actions/upload-artifact@v4  # ✅ Fixed version
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-sbom
           path: frontend-sbom.xml
@@ -108,14 +115,20 @@ jobs:
     needs: build-backend
     runs-on: ubuntu-latest
     steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget
+          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.49.1_Linux-64bit.deb
+          sudo dpkg -i trivy.deb
+
       - name: Generate SBOM for backend image (CycloneDX)
         run: |
           docker pull ${{ env.BACKEND_IMAGE }}:latest
           trivy image --format cyclonedx --output backend-sbom.xml ${{ env.BACKEND_IMAGE }}:latest
 
       - name: Upload backend SBOM
-        uses: actions/upload-artifact@v4  # ✅ Fixed version
+        uses: actions/upload-artifact@v4
         with:
           name: backend-sbom
           path: backend-sbom.xml
-
