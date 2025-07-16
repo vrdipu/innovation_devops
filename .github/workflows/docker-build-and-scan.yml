@@ -1,0 +1,69 @@
+name: CI/CD - Build, Scan, Push Docker Images
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # ✅ Enables manual trigger
+
+env:
+  DOCKER_REGISTRY: docker.io
+  FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/frontend-app
+  BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/backend-api
+
+jobs:
+  docker-build-scan-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # --- Frontend Build ---
+      - name: Build frontend image
+        run: docker build -t $FRONTEND_IMAGE:latest ./frontend
+
+      - name: Trivy scan frontend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:latest
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Dockle scan frontend image
+        uses: goodwithtech/dockle-action@v0.1.0
+        with:
+          image: ${{ env.FRONTEND_IMAGE }}:latest
+
+      - name: Push frontend image
+        run: docker push $FRONTEND_IMAGE:latest
+
+      # --- Backend Build ---
+      - name: Build backend image
+        run: docker build -t $BACKEND_IMAGE:latest ./backend
+
+      - name: Trivy scan backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:latest
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Dockle scan backend image
+        uses: goodwithtech/dockle-action@v0.1.0
+        with:
+          image: ${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Push backend image
+        run: docker push $BACKEND_IMAGE:latest
