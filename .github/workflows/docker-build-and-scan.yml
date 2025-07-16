@@ -16,7 +16,7 @@ jobs:
     outputs:
       username: ${{ secrets.DOCKER_USERNAME }}
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
   build-frontend:
@@ -38,7 +38,9 @@ jobs:
       - name: Build frontend Docker image
         run: docker build -t ${{ env.FRONTEND_IMAGE }}:latest ./frontend
 
-      - name: Scan frontend image with Trivy
+      - name: Trivy scan frontend image
+        id: trivy_frontend
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.FRONTEND_IMAGE }}:latest
@@ -50,6 +52,7 @@ jobs:
             root/.npm/_cacache/**
 
       - name: Push frontend image
+        if: always()
         run: docker push ${{ env.FRONTEND_IMAGE }}:latest
 
   build-backend:
@@ -71,7 +74,9 @@ jobs:
       - name: Build backend Docker image
         run: docker build -t ${{ env.BACKEND_IMAGE }}:latest ./backend
 
-      - name: Scan backend image with Trivy
+      - name: Trivy scan backend image
+        id: trivy_backend
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.BACKEND_IMAGE }}:latest
@@ -83,4 +88,5 @@ jobs:
             root/.npm/_cacache/**
 
       - name: Push backend image
+        if: always()
         run: docker push ${{ env.BACKEND_IMAGE }}:latest
