@@ -99,7 +99,7 @@ jobs:
           trivy image --format cyclonedx --output frontend-sbom.xml ${{ env.FRONTEND_IMAGE }}:latest
 
       - name: Upload frontend SBOM
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # ✅ Fixed version
         with:
           name: frontend-sbom
           path: frontend-sbom.xml
@@ -114,7 +114,8 @@ jobs:
           trivy image --format cyclonedx --output backend-sbom.xml ${{ env.BACKEND_IMAGE }}:latest
 
       - name: Upload backend SBOM
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # ✅ Fixed version
         with:
           name: backend-sbom
           path: backend-sbom.xml
+
