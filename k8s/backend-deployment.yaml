@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: your_dockerhub_username/contactlist-backend:latest
+          image: dirajan/contactlist-backend:latest
           ports:
             - containerPort: 3000
           env:

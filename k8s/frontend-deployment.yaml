@@ -27,6 +27,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: your_dockerhub_username/contactlist-frontend:latest
+          image: dirajan/contactlist-frontend:latest
           ports:
             - containerPort: 4200
