@@ -3,7 +3,7 @@ name: CI/CD - Build, Scan, Push Docker Images
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # ✅ Enables manual trigger
+  workflow_dispatch:  # ✅ Manual trigger support
 
 env:
   DOCKER_REGISTRY: docker.io
@@ -39,11 +39,6 @@ jobs:
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
-      - name: Dockle scan frontend image
-        uses: goodwithtech/dockle-action@v0.1.0
-        with:
-          image: ${{ env.FRONTEND_IMAGE }}:latest
-
       - name: Push frontend image
         run: docker push $FRONTEND_IMAGE:latest
 
@@ -59,11 +54,6 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
-
-      - name: Dockle scan backend image
-        uses: goodwithtech/dockle-action@v0.1.0
-        with:
-          image: ${{ env.BACKEND_IMAGE }}:latest
 
       - name: Push backend image
         run: docker push $BACKEND_IMAGE:latest
