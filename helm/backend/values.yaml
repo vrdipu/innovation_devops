@@ -1,0 +1,16 @@
+replicaCount: 2
+
+image:
+  repository: dirajan/contactlist-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+env:
+  DB_HOST: pg-release-postgresql-primary
+  DB_USER: contactuser
+  DB_PASS: contactpass
+  DB_NAME: contactdb
