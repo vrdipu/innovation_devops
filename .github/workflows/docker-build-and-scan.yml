@@ -145,9 +145,7 @@ jobs:
 
       - name: Install KICS
         run: |
-         curl -sSL https://github.com/Checkmarx/kics/releases/download/v1.7.0/kics-linux-amd64 -o kics
-         chmod +x kics
-         sudo mv kics /usr/local/bin/
+         sudo curl -sfL 'https://raw.githubusercontent.com/Checkmarx/kics/master/install.sh' | bash -s -- -b /usr/local/bin
 
 
 
@@ -170,9 +168,7 @@ jobs:
 
       - name: Install KICS
         run: |
-         curl -sSL https://github.com/Checkmarx/kics/releases/download/v1.7.0/kics-linux-amd64 -o kics
-         chmod +x kics
-         sudo mv kics /usr/local/bin/          
+          sudo curl -sfL 'https://raw.githubusercontent.com/Checkmarx/kics/master/install.sh' | bash -s -- -b /usr/local/bin        
       - name: Run KICS on backend helm chart
         run: |
           mkdir -p kics-results
