@@ -145,10 +145,12 @@ jobs:
 
       - name: Install KICS
         run: |
-         curl -sSL https://github.com/Checkmarx/kics/releases/download/v1.7.5/kics_1.7.5_linux_x64.tar.gz -o kics.tar.gz
-         tar -xzf kics.tar.gz
-         chmod +x kics
-         sudo mv kics /usr/local/bin/
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/Checkmarx/kics/releases/latest | grep tag_name | cut -d '"' -f4)
+          echo "Latest KICS version: $LATEST_VERSION"
+          curl -L -o kics https://github.com/Checkmarx/kics/releases/download/${LATEST_VERSION}/kics_${LATEST_VERSION#v}_linux_x64
+          chmod +x kics
+          sudo mv kics /usr/local/bin/
+
 
       - name: Run KICS on frontend helm chart
         run: |
@@ -169,11 +171,12 @@ jobs:
 
       - name: Install KICS
         run: |
-         curl -sSL https://github.com/Checkmarx/kics/releases/download/v1.7.5/kics_1.7.5_linux_x64.tar.gz -o kics.tar.gz
-         tar -xzf kics.tar.gz
-         chmod +x kics
-         sudo mv kics /usr/local/bin/
-
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/Checkmarx/kics/releases/latest | grep tag_name | cut -d '"' -f4)
+          echo "Latest KICS version: $LATEST_VERSION"
+          curl -L -o kics https://github.com/Checkmarx/kics/releases/download/${LATEST_VERSION}/kics_${LATEST_VERSION#v}_linux_x64
+          chmod +x kics
+          sudo mv kics /usr/local/bin/
+          
       - name: Run KICS on backend helm chart
         run: |
           mkdir -p kics-results
