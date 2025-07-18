@@ -1,9 +1,16 @@
-name: Build, Scan, and Generate SBOMs
+name: Secure CI/CD Workflow with Helm and Trivy Scanning
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      install_longhorn:
+        description: 'Enable Longhorn installation?'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
 
 env:
   DOCKER_REGISTRY: docker.io
@@ -128,3 +135,127 @@ jobs:
         with:
           name: backend-sbom
           path: backend-sbom.xml
+          
+  kics-frontend:
+    needs: bom-frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install KICS
+        run: |
+          curl -sSL https://github.com/Checkmarx/kics/releases/latest/download/kics-linux-amd64 -o kics
+          chmod +x kics
+          sudo mv kics /usr/local/bin/
+
+      - name: Run KICS on frontend helm chart
+        run: |
+          mkdir -p kics-results
+          kics scan -p helm/frontend/ -o kics-results/frontend-results.json --output-format json
+
+      - name: Upload KICS frontend results
+        uses: actions/upload-artifact@v4
+        with:
+          name: kics-frontend
+          path: kics-results/frontend-results.json
+  kics-backend:
+    needs: bom-backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install KICS
+        run: |
+          curl -sSL https://github.com/Checkmarx/kics/releases/latest/download/kics-linux-amd64 -o kics
+          chmod +x kics
+          sudo mv kics /usr/local/bin/
+
+      - name: Run KICS on backend helm chart
+        run: |
+          mkdir -p kics-results
+          kics scan -p helm/backend/ -o kics-results/backend-results.json --output-format json
+
+      - name: Upload KICS backend results
+        uses: actions/upload-artifact@v4
+        with:
+          name: kics-backend
+          path: kics-results/backend-results.json
+
+
+  connect-to-k8s-cluster:
+    name: 📡 Simulate Kubernetes Cluster Connection
+    runs-on: ubuntu-latest
+    needs: [kics-frontend, kics-backend]
+    steps:
+      - name: Dummy K8s Cluster Connect
+        run: echo "✅ Connected to Kubernetes (simulated)"
+
+  install-longhorn-if-enabled:
+    name: 📦 Conditional Longhorn Helm Install
+    if: ${{ github.event.inputs.install_longhorn == 'true' }}
+    needs: connect-to-k8s-cluster
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulated Helm install for Longhorn
+        run: echo "🚀 Longhorn Helm installation would happen here."
+
+  validate-postgres-helm-chart:
+    name: 🧪 Validate PostgreSQL Helm Template
+    needs: [connect-to-k8s-cluster, install-longhorn-if-enabled]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Helm template for PostgreSQL
+        run: helm template helm/postgresql/
+
+  validate-backend-helm-template:
+    name: 🧪 Validate Backend Helm Template
+    needs: validate-postgres-helm-chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Helm template for Backend
+        run: helm template helm/backend/
+
+  validate-frontend-helm-template:
+    name: 🧪 Validate Frontend Helm Template
+    needs: validate-postgres-helm-chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Helm template for Frontend
+        run: helm template helm/frontend/
+
+  deploy-backend-to-k8s:
+    name: 🚀 Deploy Backend to K8s (Simulated)
+    needs: validate-backend-helm-template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate backend Helm install
+        run: echo "✅ Backend deployed via Helm (simulated)."
+
+  deploy-frontend-to-k8s:
+    name: 🚀 Deploy Frontend to K8s (Simulated)
+    needs: validate-frontend-helm-template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate frontend Helm install
+        run: echo "✅ Frontend deployed via Helm (simulated)."
+
+  run-functional-tests:
+    name: 🧪 Functional Test with curl (Simulated)
+    needs: [deploy-backend-to-k8s, deploy-frontend-to-k8s]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate HTTP API test
+        run: |
+          echo "🔥 Functional testing with curl..."
+          curl --version || echo "(Simulation only, no real service running)"
