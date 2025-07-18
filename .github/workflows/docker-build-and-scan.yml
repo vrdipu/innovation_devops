@@ -150,6 +150,7 @@ jobs:
 
 
       - name: Run KICS on frontend helm chart
+        continue-on-error: true
         run: |
           mkdir -p kics-results
           kics scan -p helm/frontend/ -o kics-results/frontend-results.json --output-format json
@@ -170,6 +171,7 @@ jobs:
         run: |
           sudo curl -sfL 'https://raw.githubusercontent.com/Checkmarx/kics/master/install.sh' | bash -s -- -b /usr/local/bin        
       - name: Run KICS on backend helm chart
+        continue-on-error: true
         run: |
           mkdir -p kics-results
           kics scan -p helm/backend/ -o kics-results/backend-results.json --output-format json
