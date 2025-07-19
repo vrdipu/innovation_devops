@@ -221,6 +221,13 @@ jobs:
 
       - name: Helm template for PostgreSQL
         run: helm template helm/postgresql/
+  deploy-PostgreSQL-to-k8s:
+    name: 🚀 Deploy  PostgreSQL to K8s (Simulated)
+    needs: validate-backend-helm-template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate  PostgreSQL Helm install
+        run: echo "✅ PostgreSQL deployed via Helm (simulated)."
 
   validate-backend-helm-template:
     name: 🧪 Validate Backend Helm Template
