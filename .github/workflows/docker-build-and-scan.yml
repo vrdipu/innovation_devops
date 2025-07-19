@@ -253,7 +253,7 @@ jobs:
 
   deploy-backend-to-k8s:
     name: 🚀 Deploy Backend to K8s (Simulated)
-    needs: validate-backend-helm-template
+    needs:  [validate-postgres-helm-chart,deploy-PostgreSQL-to-k8s]
     runs-on: ubuntu-latest
     steps:
       - name: Simulate backend Helm install
@@ -261,7 +261,7 @@ jobs:
 
   deploy-frontend-to-k8s:
     name: 🚀 Deploy Frontend to K8s (Simulated)
-    needs: validate-frontend-helm-template
+    needs:  [validate-postgres-helm-chart,deploy-PostgreSQL-to-k8s]
     runs-on: ubuntu-latest
     steps:
       - name: Simulate frontend Helm install
