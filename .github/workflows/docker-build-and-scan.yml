@@ -213,7 +213,7 @@ jobs:
 
   validate-postgres-helm-chart:
     name: 🧪 Validate PostgreSQL Helm Template
-    needs: [connect-to-k8s-cluster, install-longhorn-if-enabled]
+    needs: [connect-to-k8s-cluster]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
