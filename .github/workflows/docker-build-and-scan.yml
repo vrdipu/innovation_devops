@@ -144,12 +144,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run KICS on frontend Helm chart via Docker
+    - name: Run KICS scan on frontend Helm chart using Docker
       continue-on-error: true
       run: |
         mkdir -p kics-results/frontend
         docker pull checkmarx/kics:latest
-        docker run -t -v "${{ github.workspace }}/helm/frontend:/path" -v "${{ github.workspace }}/kics-results/frontend:/output" checkmarx/kics:latest scan -p /path -o /output --output-name frontend-results.json --output-format json
+        docker run -t \
+          -v "${{ github.workspace }}/helm/frontend:/path" \
+          -v "${{ github.workspace }}/kics-results/frontend:/output" \
+          checkmarx/kics:latest scan \
+          -p /path \
+          -o /output \
+          --output-name frontend-results \
+          --report-formats json
 
     - name: Upload frontend KICS results
       uses: actions/upload-artifact@v4
@@ -165,18 +172,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run KICS on backend Helm chart via Docker
+    - name: Run KICS scan on backend Helm chart using Docker
       continue-on-error: true
       run: |
         mkdir -p kics-results/backend
         docker pull checkmarx/kics:latest
-        docker run -t -v "${{ github.workspace }}/helm/backend:/path" -v "${{ github.workspace }}/kics-results/backend:/output" checkmarx/kics:latest scan -p /path -o /output --output-name backend-results.json --output-format json
+        docker run -t \
+          -v "${{ github.workspace }}/helm/backend:/path" \
+          -v "${{ github.workspace }}/kics-results/backend:/output" \
+          checkmarx/kics:latest scan \
+          -p /path \
+          -o /output \
+          --output-name backend-results \
+          --report-formats json
 
     - name: Upload backend KICS results
       uses: actions/upload-artifact@v4
       with:
         name: kics-backend
         path: kics-results/backend/backend-results.json
+
 
 
   connect-to-k8s-cluster:
