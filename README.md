@@ -265,12 +265,3 @@ innovation_devops/
 
 ---
 
-## 📣 Contributing
-
-Feel free to fork and PR. All enhancements and suggestions are welcome!
-
----
-
-## 📝 License
-
-MIT
