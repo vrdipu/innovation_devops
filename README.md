@@ -51,32 +51,36 @@ Each service is containerized with Docker:
   ```bash
   docker build -t yourdockerhub/contactlist-frontend:latest ./frontend
   docker push yourdockerhub/contactlist-frontend:latest
+  ```
+
 - **Backend:**
   ```bash
   docker build -t yourdockerhub/contactlist-backend:latest ./backend
   docker push yourdockerhub/contactlist-backend:latest
+  ```
 
-🚀 Kubernetes Deployment Strategy
-All components are deployed via Helm charts stored in helm/:
+---
 
-bash
-Copy
-Edit
+## 🚀 Kubernetes Deployment Strategy
+
+All components are deployed via **Helm charts** stored in `helm/`:
+
+```bash
 helm install contactlist-backend ./helm/backend
 helm install contactlist-frontend ./helm/frontend
 helm install pg-release ./helm/postgresql
-💾 PostgreSQL - High Availability
-Deployed using Bitnami’s PostgreSQL Helm chart
+```
 
-Uses architecture=replication and replicaCount=3
+---
 
-Persistent Volumes provisioned via Longhorn CSI
+## 💾 PostgreSQL - High Availability
 
-Data survives pod restarts and node failures
+- Deployed using **Bitnami’s PostgreSQL Helm chart**
+- Uses **architecture=replication** and **replicaCount=3**
+- Persistent Volumes provisioned via **Longhorn CSI**
+- Data survives pod restarts and node failures
 
-bash
-Copy
-Edit
+```bash
 helm install pg-release bitnami/postgresql \
   --set architecture=replication \
   --set replicaCount=3 \
@@ -87,12 +91,15 @@ helm install pg-release bitnami/postgresql \
   --set primary.persistence.size=2Gi \
   --set readReplicas.persistence.storageClass=longhorn \
   --set readReplicas.persistence.size=2Gi
-🌐 Ingress Configuration
+```
+
+---
+
+## 🌐 Ingress Configuration
+
 Exposed via NGINX Ingress Controller:
 
-yaml
-Copy
-Edit
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -112,23 +119,26 @@ spec:
             name: frontend
             port:
               number: 80
-Add /etc/hosts entry for local DNS:
+```
 
-bash
-Copy
-Edit
+Add `/etc/hosts` entry for local DNS:
+```bash
 echo "192.168.x.x example.com" | sudo tee -a /etc/hosts
-🧪 Accessing the Application
-Frontend: http://example.com/
+```
 
-Backend API: ClusterIP or through NodePort for testing
+---
 
-PostgreSQL: Only accessible internally by backend
+## 🧪 Accessing the Application
 
-📁 Folder Structure
-bash
-Copy
-Edit
+- Frontend: `http://example.com/`
+- Backend API: ClusterIP or through NodePort for testing
+- PostgreSQL: Only accessible internally by backend
+
+---
+
+## 📁 Folder Structure
+
+```
 innovation_devops/
 │
 ├── backend/                 # Node.js + Express API
@@ -140,10 +150,23 @@ innovation_devops/
 ├── contact-list-ha-architecture.png  # Architecture Diagram
 ├── README.md
 └── docker-compose.yml      # For local development
-🛡️ Dependencies
-Longhorn requires open-iscsi to be installed on all worker nodes.
+```
 
-Make sure CSI is installed and running before provisioning PVCs.
+---
 
-📣 Contributing
+## 🛡️ Dependencies
+
+- `Longhorn` requires `open-iscsi` to be installed on all worker nodes.
+- Make sure CSI is installed and running before provisioning PVCs.
+
+---
+
+## 📣 Contributing
+
 Feel free to fork and PR. All enhancements and suggestions are welcome!
+
+---
+
+## 📝 License
+
+MIT
