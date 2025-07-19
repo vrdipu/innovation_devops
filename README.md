@@ -135,6 +135,110 @@ echo "192.168.x.x example.com" | sudo tee -a /etc/hosts
 - PostgreSQL: Only accessible internally by backend
 
 ---
+# 🔐 Enabling TLS for NGINX Ingress - Contact List App
+
+This guide explains how to **secure your Contact List application** with **TLS encryption** using NGINX Ingress Controller and Kubernetes secrets.
+
+---
+
+## 📜 Prerequisites
+
+- Your NGINX Ingress Controller must support TLS.
+- A domain name (e.g., `example.com`) must point to your cluster's ingress IP.
+- TLS certificate and key (self-signed or from a provider like Let's Encrypt)
+
+---
+
+## 🔧 Step 1: Generate Self-Signed Certificate (Optional for Testing)
+
+You can use a real cert or generate a self-signed one:
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -out tls.crt -keyout tls.key \
+  -subj "/CN=example.com/O=example.com"
+```
+
+---
+
+## 📁 Step 2: Create TLS Secret
+
+```bash
+kubectl create secret tls contactlist-tls-secret \
+  --cert=tls.crt \
+  --key=tls.key
+```
+
+This creates a Kubernetes secret named `contactlist-tls-secret`.
+
+---
+
+## 🧾 Step 3: TLS Ingress YAML
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - example.com
+    secretName: contactlist-tls-secret
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+```
+
+---
+
+## 🌐 Step 4: Update `/etc/hosts` (for local DNS)
+
+```bash
+echo "192.168.x.x example.com" | sudo tee -a /etc/hosts
+```
+
+Replace `192.168.x.x` with your ingress controller's external IP or NodePort IP.
+
+---
+
+## ✅ Verify TLS is Working
+
+Once deployed:
+
+```bash
+kubectl apply -f ingress-tls.yaml
+curl -k https://example.com
+```
+
+You should see your Angular frontend served over HTTPS.
+
+---
+
+## 🛠️ Optional: Automate TLS via Cert-Manager
+
+You can use [cert-manager](https://cert-manager.io/) with Let’s Encrypt for automatic TLS management.
+
+---
+
+## 🔚 Summary
+
+- TLS adds encryption and trust to your application.
+- Use secrets to store certs and configure them in the Ingress definition.
+- For production, use a trusted CA like Let’s Encrypt or your org’s certificate authority.
+
+
 
 ## 📁 Folder Structure
 
