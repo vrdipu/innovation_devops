@@ -232,7 +232,7 @@ You can use [cert-manager](https://cert-manager.io/) with Let’s Encrypt for au
 
 ---
 
-## 🔚 Summary
+
 
 - TLS adds encryption and trust to your application.
 - Use secrets to store certs and configure them in the Ingress definition.
